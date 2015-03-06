@@ -1,0 +1,6 @@
+api/bin
+api/pkg
+api/src/gin-bin
+api/src/github.com
+api/src/src
+web/lib
