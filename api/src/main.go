@@ -42,20 +42,20 @@ func main() {
 }
 
 type List struct {
-	Id        int64     `json:"Id"`
-	Name      string    `sql:"size:255" json:"Name"`
-	CreatedOn time.Time `json:"CreatedOn"`
-	ReadKey   string    `sql:"size:32"`
-	RwKey     string    `sql:"size:32"`
+	Id        int64     `json:"id"`
+	Name      string    `sql:"size:255" json:"name"`
+	CreatedOn time.Time `json:"created_on"`
+	ReadKey   string    `sql:"size:32" json:"read_key"`
+	RwKey     string    `sql:"size:32" json:"rw_key"`
 }
 
 type Item struct {
-	Id     int64  `json:"Id"`
-	ListId int64  `json:"ListId"`
-	Item   string `sql:"size:255" json:"Item"`
-	B      int    `json:"B"`
-	D      int    `json:"D"`
-	C      int    `json:"C"`
+	Id     int64  `json:"id"`
+	ListId int64  `json:"list_id"`
+	Item   string `sql:"size:255" json:"item"`
+	B      int    `json:"b"`
+	D      int    `json:"d"`
+	C      int    `json:"c"`
 }
 
 type Impl struct {
