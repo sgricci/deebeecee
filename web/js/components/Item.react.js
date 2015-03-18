@@ -10,7 +10,7 @@ var Item = React.createClass({
 			item = this._getSelected();
 		} else {
 			item = (
-				<tr onDoubleClick={this._onDoubleClick}>
+				<tr onClick={this._onClick}>
 					<td colSpan="2">{this.props.item.item}</td>
 					<td>{this.props.item.b}</td>
 					<td>{this.props.item.d}</td>
@@ -27,23 +27,27 @@ var Item = React.createClass({
 					<a href="javascript:void(0);" onClick={this._onSave}>
 						<i className="fa fa-floppy-o"></i>
 					</a>
+					&nbsp;
+					<a href="javascript:void(0);" onClick={this._onDelete}>
+						<i className="fa fa-remove"></i>
+					</a>
 				</td>
 				<td>
-					<input type="text" onKeyDown={this._onKeyDown} className="item" name="item" defaultValue={this.props.item.item} />
+					<input type="text" onKeyDown={this._onKeyDown} className="item form-control" name="item" defaultValue={this.props.item.item} />
 				</td>
 				<td>
-					<input type="text" onKeyDown={this._onKeyDown} className="b" name="b" defaultValue={this.props.item.b} />
+					<input type="text" onKeyDown={this._onKeyDown} className="b form-control" name="b" defaultValue={this.props.item.b} />
 				</td>
 				<td>
-					<input type="text" onKeyDown={this._onKeyDown} className="d" name="d" defaultValue={this.props.item.d} />
+					<input type="text" onKeyDown={this._onKeyDown} className="d form-control" name="d" defaultValue={this.props.item.d} />
 				</td>
 				<td>
-					<input type="text" onKeyDown={this._onKeyDown} className="c" name="c" defaultValue={this.props.item.c} />
+					<input type="text" onKeyDown={this._onKeyDown} className="c form-control" name="c" defaultValue={this.props.item.c} />
 				</td>
 			</tr>
 		);
 	},
-	_onDoubleClick: function(event) {
+	_onClick: function(event) {
 		ListViewActionCreators.clickItem(this.props.entityId);
 	},
 	_onSave: function(event) {
@@ -58,6 +62,11 @@ var Item = React.createClass({
 
 		DataServerActionCreators.updateItem(item);
 		ListViewActionCreators.clearSelection();
+	},
+	_onDelete: function(event) {
+		var id = this.props.entityId;
+		ListViewActionCreators.clearSelection();
+		DataServerActionCreators.deleteItem(id);
 	},
 	_onKeyDown: function(event) {
 		if (event.nativeEvent.which == 13) {

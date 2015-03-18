@@ -3,7 +3,7 @@ var DataWebAPIUtils = require('./utils/DataWebAPIUtils');
 
 var React = require('react');
 
-DataWebAPIUtils.getAllNodes();
+//DataWebAPIUtils.getAllNodes();
 
 React.render(
 	<App />,

@@ -19,4 +19,16 @@ module.exports = {
 			item: item
 		});
 	},
+	addItem: function(item) {
+		AppDispatcher.handleServerAction({
+			type:"ADD_ITEM",
+			item: item
+		});
+	},
+	deleteItem: function(id) {
+		AppDispatcher.handleServerAction({
+			type:"DELETE_ITEM",
+			id: id
+		});
+	}
 };

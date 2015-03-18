@@ -1,50 +1,47 @@
+var DataServerActionCreators = require('../actions/DataServerActionCreators');
 var React = require('react');
 
 var NewItem = React.createClass({
 	render: function() {
 		return (
-			<tr>
+			<tr className="item_row_add">
 				<td className="add">
-					<i onClick={this.onClick} className="fa fa-check"></i>
+					<i onClick={this._onSave} className="fa fa-check"></i>
 				</td>
 				<td>
-					<input type="text" name="Item" defaultValue="" placeholder="Name..." className="form-control" />
+					<input type="text" onKeyDown={this._onKeyDown} name="item" defaultValue="" placeholder="Name..." className="form-control item" />
 				</td>
 				<td>
-					<input type="text" name="B" defaultValue="" placeholder="Breadth" className="form-control" />
+					<input type="text" onKeyDown={this._onKeyDown} name="b" defaultValue="" placeholder="Breadth" className="form-control b" />
 				</td>
 				<td>
-					<input type="text" name="D" defaultValue="" placeholder="Depth" className="form-control" />
+					<input type="text" onKeyDown={this._onKeyDown} name="d" defaultValue="" placeholder="Depth" className="form-control d" />
 				</td>
 				<td>
-					<input type="text" name="C" defaultValue="" placeholder="Cost to build" className="form-control" />
+					<input type="text" onKeyDown={this._onKeyDown} name="c" defaultValue="" placeholder="Cost to build" className="form-control c" />
 				</td>
 			</tr>
 		);
 	},
-	onClick: function(event) {
-		$this = $(event.nativeEvent.originalTarget).parent().parent();
-		var params = {
+	_onSave: function(event) {
+		var item_row = $('.item_row_add');
+		var item = {
+			item: item_row.find('input.item').val(),
+			list_id: this.props.list.id,
+			b: item_row.find('input.b').val(),
+			d: item_row.find('input.d').val(),
+			c: item_row.find('input.c').val()
 		};
-		$this.find('input').each(function(i, el) {
-			var name = $(el).attr('name');
-			if (name != "Item") {
-				params[name] = parseInt($(el).val(),10);
-			}
-			else {
-				params[name] = $(el).val();
-			}
-			$(el).val('');
-		});
-		params['ListId'] = this.props.list.Id;
-		$.ajax({
-			url: '/api/item', 
-			type: 'POST',
-			headers: { "Content-Type": "application/json" },
-			data: JSON.stringify(params), 
-			success: function(data) {
-			get_items(params['ListId']);
-		}});
+		DataServerActionCreators.addItem(item);
+		item_row.find('input').val('');
+		item_row.find('input.item').focus();
+	},
+	_onKeyDown: function(event) {
+		if (event.nativeEvent.which == 13) {
+			return this._onSave(event);
+		} else {
+			return;
+		}
 	}
 });
 

@@ -23,3 +23,7 @@ h1 input:focus {
 td.add i {
 	cursor: pointer;
 }
+
+td input {
+	background-color: #fff;
+}

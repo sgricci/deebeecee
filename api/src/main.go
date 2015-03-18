@@ -1,12 +1,14 @@
 package main
 
 import (
+	"crypto/rand"
 	"fmt"
 	"github.com/ant0ine/go-json-rest/rest"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -62,6 +64,12 @@ type Impl struct {
 	DB gorm.DB
 }
 
+func randToken() string {
+	b := make([]byte, 8)
+	rand.Read(b)
+	return fmt.Sprintf("%x", b)
+}
+
 func (i *Impl) InitDB() {
 	var err error
 	i.DB, err = gorm.Open("mysql", "root:root@/starfish_prime?charset=utf8&parseTime=True")
@@ -75,6 +83,17 @@ func (i *Impl) InitDB() {
 func (i *Impl) InitSchema() {
 	i.DB.AutoMigrate(&List{})
 	i.DB.AutoMigrate(&Item{})
+}
+
+func (i *Impl) CheckAuth(list_id int64, rw_key string) bool {
+	list := List{}
+	if i.DB.Where("id = ?", list_id).Find(&list).Error != nil {
+		return false
+	}
+	if list.RwKey != rw_key {
+		return false
+	}
+	return true
 }
 
 func (i *Impl) GetAllLists(w rest.ResponseWriter, r *rest.Request) {
@@ -94,11 +113,15 @@ func (i *Impl) GetList(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func (i *Impl) PostList(w rest.ResponseWriter, r *rest.Request) {
+
 	list := List{}
 	if err := r.DecodeJsonPayload(&list); err != nil {
 		rest.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	list.ReadKey = randToken()
+	list.RwKey = randToken()
+
 	if err := i.DB.Save(&list).Error; err != nil {
 		rest.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -119,6 +142,15 @@ func (i *Impl) PutList(w rest.ResponseWriter, r *rest.Request) {
 		rest.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	str_id, err := strconv.Atoi(id)
+	if err != nil {
+		rest.Error(w, "Invalid List ID", http.StatusInternalServerError)
+		return
+	}
+	if i.CheckAuth(int64(str_id), r.Request.Header.Get("RwKey")) == false {
+		rest.Error(w, "Auth Check Failed", http.StatusInternalServerError)
+		return
+	}
 
 	list.Name = updated.Name
 
@@ -134,6 +166,16 @@ func (i *Impl) DeleteList(w rest.ResponseWriter, r *rest.Request) {
 	list := List{}
 	if i.DB.First(&list, id).Error != nil {
 		rest.NotFound(w, r)
+		return
+	}
+
+	str_id, err := strconv.Atoi(id)
+	if err != nil {
+		rest.Error(w, "Invalid List ID", http.StatusInternalServerError)
+		return
+	}
+	if i.CheckAuth(int64(str_id), r.Request.Header.Get("RwKey")) == false {
+		rest.Error(w, "Auth Check Failed", http.StatusInternalServerError)
 		return
 	}
 
@@ -175,6 +217,10 @@ func (i *Impl) PostItem(w rest.ResponseWriter, r *rest.Request) {
 		rest.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	if i.CheckAuth(item.ListId, r.Request.Header.Get("RwKey")) == false {
+		rest.Error(w, "Auth Check Failed", http.StatusInternalServerError)
+		return
+	}
 	if err := i.DB.Save(&item).Error; err != nil {
 		rest.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -195,6 +241,11 @@ func (i *Impl) PutItem(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
+	if i.CheckAuth(item.ListId, r.Request.Header.Get("RwKey")) == false {
+		rest.Error(w, "Auth Check Failed", http.StatusInternalServerError)
+		return
+	}
+
 	item.Item = updated.Item
 	item.ListId = updated.ListId
 	item.B = updated.B
@@ -212,6 +263,11 @@ func (i *Impl) DeleteItem(w rest.ResponseWriter, r *rest.Request) {
 	item := Item{}
 	if i.DB.First(&item, id).Error != nil {
 		rest.NotFound(w, r)
+		return
+	}
+
+	if i.CheckAuth(item.ListId, r.Request.Header.Get("RwKey")) == false {
+		rest.Error(w, "Auth Check Failed", http.StatusInternalServerError)
 		return
 	}
 

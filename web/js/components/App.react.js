@@ -7,7 +7,7 @@ var App = React.createClass({
 	getInitialState: function() {
 		return {
 			list: {
-				name: "", 
+				name: "Enter a name for your list...", 
 				items:[]
 			},
 			selection: null
