@@ -4,3 +4,4 @@ api/src/gin-bin
 api/src/github.com
 api/src/src
 web/lib
+web/node_modules
